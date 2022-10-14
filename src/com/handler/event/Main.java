@@ -12,6 +12,8 @@ public class Main {
         String title = in.nextLine();
         boolean dataError = false;
         Event myEvent = null;
+
+        /* --- EVENT CREATION --- */
         while(!dataError){ //to keep asking in case of wrong date
             System.out.println("Quando?");
             LocalDate date = setDate(in);
@@ -27,21 +29,25 @@ public class Main {
             }
         }
 
-        System.out.println("Vuoi prenotare per questo evento? y/n\n" + myEvent);
+        int reservationsNum = 0;
         boolean stop = false;
+
+        /* --- EVENT RESERVATION --- */
+        System.out.println("Vuoi prenotare per questo evento? y/n\n" + myEvent);
         while(!stop) { //to keep asking in case of wrong answ
             String answ = in.nextLine();
             if (answ.equalsIgnoreCase("y")) {
                 while (answ.equalsIgnoreCase("y")) { //to keep asking in case of wrong answ at
                     if (answ.equalsIgnoreCase("y")) {
                         System.out.println("Quanti posti?");
-                        int reservationsNum = in.nextInt();
+                        reservationsNum = in.nextInt();
                         in.nextLine();
                         try {
-                            for (int i = reservationsNum; i > 0; i--) {
-                                assert myEvent != null;
-                                myEvent.reserveSeat();
-                            }
+//                            for (int i = reservationsNum; i > 0; i--) {
+//                                myEvent.reserveSeat();
+//                            }
+                            myEvent.reserveSeats(reservationsNum);
+                            printSeatsStatus(myEvent);
                             answ = "end";
                             stop = true;
                         } catch (IllegalArgumentException e) {
@@ -59,7 +65,43 @@ public class Main {
             }
         }
 
-        System.out.printf("Sono stati prenotati %d posti. Ne rimangono %d", myEvent.getReservedSeats(), (myEvent.getTotSeats()- myEvent.getReservedSeats()));
+
+        /* --- EVENT CANCELLATION --- */
+        stop = false;
+        if(reservationsNum > 0){
+            System.out.println("Vuoi disdire i posti prenotati?");
+            while (!stop) { //to keep asking in case of wrong answ
+                String answ = in.nextLine();
+                if (answ.equalsIgnoreCase("y")) {
+                    while (answ.equalsIgnoreCase("y")) { //to keep asking in case of wrong answ at
+                        if (answ.equalsIgnoreCase("y")) {
+                            System.out.println("Ne hai prenotati " + reservationsNum + "\nQuanti posti vuoi disdire?");
+                            int seatsToCancel = in.nextInt();
+                            in.nextLine();
+                            if(seatsToCancel <= reservationsNum){
+                                try {
+                                    for (int i = seatsToCancel; i > 0; i--) {
+                                        myEvent.cancelSeat();
+                                    }
+                                    printSeatsStatus(myEvent);
+                                    answ = "end";
+                                    stop = true;
+                                } catch (IllegalArgumentException e) {
+                                    System.out.println(e.getMessage());
+                                }
+                            }
+                        } else if (!answ.equalsIgnoreCase("n")) {
+                            System.out.println("inserisci 'y' = yes o 'n' = no per fare una scelta");
+                        }
+                    }
+                } else if (!answ.equalsIgnoreCase("n")) {
+                    System.out.println("inserisci 'y' = yes o 'n' = no per fare una scelta");
+                } else {
+                    stop = true;
+                }
+            }
+        }
+
 
     }
 
@@ -82,4 +124,7 @@ public class Main {
         }
     }
 
+    static void printSeatsStatus(Event myEvent){
+        System.out.printf("Sono stati prenotati %d posti. Ne rimangono %d\n", myEvent.getReservedSeats(), (myEvent.getTotSeats()- myEvent.getReservedSeats()));
+    }
 }
